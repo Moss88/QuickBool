@@ -1,15 +1,15 @@
 #ifndef BOOLEXPR_H
 #define BOOLEXPR_H
 #include <vector>
+#include "BoolBasicDefs.h"
 #include "BoolType.h"
-
 class BoolExpr : public BoolType {
 
-    virtual std::vector<BoolType>::iterator begin() {
+    virtual std::vector<UBoolType>::iterator begin() {
         return operands.begin();
     }
 
-    virtual std::vector<BoolType>::iterator end() {
+    virtual std::vector<UBoolType>::iterator end() {
         return operands.end();
     }
 
@@ -17,16 +17,16 @@ class BoolExpr : public BoolType {
         return operands.size();
     }
 
-    constexpr bool isVar() const {
+    bool isVar() const {
         return false;
     }
 
-    constexpr bool isExpr() const {
+    bool isExpr() const {
         return true;
     }
 
-private:
-    std::vector<BoolType> operands;
+protected:
+    std::vector<UBoolType> operands;
 };
 
 

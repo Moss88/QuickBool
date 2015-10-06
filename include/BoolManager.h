@@ -5,8 +5,8 @@
 #include <memory>
 #include "BoolFunc.h"
 #include "BitVector.h"
+#include "BoolBit.h"
 
-class BoolBit;
 
 class BoolManager {
     struct KeyPair {
@@ -22,11 +22,12 @@ class BoolManager {
 
 public:
     BoolManager() = default;
-    BoolFunc getBit(std::string name);
+    BoolFunc getBit(std::string name, int idx = 0);
     BitVector getBitVector(std::string name, unsigned int size);
+    void setValue(BoolValue val, std::string name, int idx = 0);
     unsigned int numberVars() const;
 private:
-    std::map<KeyPair, std::shared_ptr<BoolBit>> vars;
+    std::map<KeyPair, std::shared_ptr<BoolBitShared>> vars;
 };
 
 #endif // BOOLMANAGER_H
