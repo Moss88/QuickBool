@@ -4,6 +4,7 @@
 class BoolNot : public BoolExpr {
 public:
     BoolNot() = default;
+    BoolNot(const BoolNot &a);
     BoolNot(BoolType& a);
     std::string toString() const;
     BoolValue value() const;

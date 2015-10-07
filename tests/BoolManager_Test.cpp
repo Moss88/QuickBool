@@ -24,3 +24,11 @@ TEST(BoolManager, GetVar) {
     EXPECT_EQ(aCopyPtr->value(), BoolValue::One);
 }
 
+TEST(BoolManager, GetVector)
+{
+    BoolManager bm;
+    BitVector bv = bm.getBitVector("a", 2);
+    ASSERT_EQ(bv.size(), 2);
+    EXPECT_EQ(bv.begin()->toString(), "a[0]");
+    EXPECT_EQ((bv.begin() + 1)->toString(), "a[1]");
+}

@@ -4,6 +4,7 @@
 class BoolOr : public BoolExpr {
 public:
     BoolOr() = default;
+    BoolOr(std::unique_ptr<BoolType> a, const BoolType &b);
     BoolOr(const BoolType& a, const BoolType& b);
     BoolOr(const BoolOr& other);
     std::string toString() const;

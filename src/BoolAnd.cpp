@@ -1,4 +1,5 @@
 #include "BoolAnd.h"
+
 using std::unique_ptr;
 
 BoolAnd::BoolAnd(unique_ptr<BoolType> a, const BoolType &b) {

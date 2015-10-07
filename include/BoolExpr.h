@@ -4,12 +4,20 @@
 #include "BoolBasicDefs.h"
 #include "BoolType.h"
 class BoolExpr : public BoolType {
-
+public:
     virtual std::vector<UBoolType>::iterator begin() {
         return operands.begin();
     }
 
     virtual std::vector<UBoolType>::iterator end() {
+        return operands.end();
+    }
+
+    virtual std::vector<UBoolType>::const_iterator begin() const {
+        return operands.begin();
+    }
+
+    virtual std::vector<UBoolType>::const_iterator end() const {
         return operands.end();
     }
 

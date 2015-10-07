@@ -9,14 +9,14 @@ public:
     BitVector() = default;
     BitVector(const std::vector<BoolFunc> &bits);
     BitVector(const std::vector<BoolFunc> &&bits);
-    BoolFunc operator&(const BitVector) const;
-    BoolFunc operator|(const BitVector) const;
-    BoolFunc operator<(const BitVector) const;
-    BoolFunc operator<=(const BitVector) const;
-    BoolFunc operator>(const BitVector) const;
-    BoolFunc operator>=(const BitVector) const;
-    BoolFunc operator==(const BitVector) const;
-    BoolFunc operator!=(const BitVector) const;
+    BoolFunc operator&(const BitVector& other)  const;
+    BoolFunc operator|(const BitVector& other)  const;
+    BoolFunc operator<(const BitVector& other)  const;
+    BoolFunc operator<=(const BitVector& other) const;
+    BoolFunc operator>(const BitVector& other)  const;
+    BoolFunc operator>=(const BitVector& other) const;
+    BoolFunc operator==(const BitVector& other) const;
+    BoolFunc operator!=(const BitVector& other) const;
 
     std::vector<BoolFunc>::iterator begin();
     std::vector<BoolFunc>::iterator end();

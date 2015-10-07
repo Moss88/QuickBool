@@ -1,8 +1,14 @@
 #include "BoolNot.h"
-
+#include "iostream"
+using namespace std;
 BoolNot::BoolNot(BoolType &a) {
     this->operands.push_back(std::unique_ptr<BoolType>(a.clone()));
 }
+
+BoolNot::BoolNot(const BoolNot& a) {
+    this->operands.push_back(std::unique_ptr<BoolType>(a.operands.front()->clone()));
+}
+
 
 std::string BoolNot::toString() const {
     return "!(" + this->operands.front()->toString() +")";
@@ -19,5 +25,5 @@ BoolValue BoolNot::value() const {
 }
 
 BoolType* BoolNot::clone() const {
-    return nullptr; //new BoolNot(*this);
+    return new BoolNot(*this);
 }

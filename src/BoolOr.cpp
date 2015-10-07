@@ -1,5 +1,11 @@
 #include "BoolOr.h"
+
 using std::unique_ptr;
+BoolOr::BoolOr(unique_ptr<BoolType> a, const BoolType &b) {
+    this->operands.push_back(move(a));
+    this->operands.push_back(unique_ptr<BoolType>(b.clone()));
+}
+
 BoolOr::BoolOr(const BoolType& a, const BoolType& b) {
     this->operands.push_back(unique_ptr<BoolType>(a.clone()));
     this->operands.push_back(unique_ptr<BoolType>(b.clone()));
