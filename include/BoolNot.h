@@ -9,6 +9,8 @@ public:
     std::string toString() const;
     BoolValue value() const;
     BoolType* clone() const;
+    bool isNot() const;
+
 };
 
 #endif // BOOLNOT_H

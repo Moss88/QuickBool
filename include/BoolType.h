@@ -4,11 +4,35 @@
 #include "BoolBasicDefs.h"
 class BoolType {
 public:
-    virtual bool isVar() const = 0;
-    virtual bool isExpr() const = 0;
     virtual BoolType* clone() const = 0;
     virtual std::string toString() const = 0;
     virtual BoolValue value() const = 0;
+
+    virtual bool isVar() const {
+        return false;
+    }
+
+    virtual bool isExpr() const {
+        return false;
+    }
+    virtual bool isAnd() const {
+        return false;
+    }
+    virtual bool isOr() const {
+        return false;
+    }
+    virtual bool isNot() const {
+        return false;
+    }
+
+    virtual bool isOne() const {
+        return false;
+    }
+
+    virtual bool isZero() const {
+        return false;
+    }
+
 protected:
     friend std::ostream& operator<< (std::ostream& outStream, const BoolType& val);
 

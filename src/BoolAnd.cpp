@@ -2,14 +2,44 @@
 
 using std::unique_ptr;
 
-BoolAnd::BoolAnd(unique_ptr<BoolType> a, const BoolType &b) {
-    this->operands.push_back(move(a));
-    this->operands.push_back(unique_ptr<BoolType>(b.clone()));
+BoolAnd::BoolAnd(unique_ptr<BoolType> a, const BoolType &b) {       
+    if(a.get()->isAnd())
+    {
+        BoolAnd* andPtr = static_cast<BoolAnd*>(a.get());
+        for(auto &op:*andPtr)
+            this->operands.push_back(move(op));
+    }
+    else
+        this->operands.push_back(move(a));
+
+    if(b.isAnd())
+    {
+        const BoolAnd* ptr = static_cast<const BoolAnd*>(&b);
+        for(auto &op:*ptr)
+            this->operands.push_back(std::unique_ptr<BoolType>(op.get()->clone()));
+    }
+    else
+        this->operands.push_back(unique_ptr<BoolType>(b.clone()));
 }
 
 BoolAnd::BoolAnd(const BoolType &a, const BoolType &b) {
-    this->operands.push_back(unique_ptr<BoolType>(a.clone()));
-    this->operands.push_back(unique_ptr<BoolType>(b.clone()));
+    if(a.isAnd())
+    {
+        const BoolAnd* ptr = static_cast<const BoolAnd*>(&a);
+        for(auto &op:*ptr)
+            this->operands.push_back(std::unique_ptr<BoolType>(op.get()->clone()));
+    }
+    else
+        this->operands.push_back(unique_ptr<BoolType>(a.clone()));
+
+    if(b.isAnd())
+    {
+        const BoolAnd* ptr = static_cast<const BoolAnd*>(&b);
+        for(auto &op:*ptr)
+            this->operands.push_back(std::unique_ptr<BoolType>(op.get()->clone()));
+    }
+    else
+        this->operands.push_back(unique_ptr<BoolType>(b.clone()));
 }
 
 BoolAnd::BoolAnd(const BoolAnd& other) {
@@ -18,9 +48,17 @@ BoolAnd::BoolAnd(const BoolAnd& other) {
 }
 
 std::string BoolAnd::toString() const {
-    return "(" + operands.front()->toString() + " & "
-            + operands.back()->toString() + ")";
+    std::string str = "(";
+    auto lastPos = operands.cend() - 1;
+    for(auto iter = operands.cbegin(); iter != operands.cend(); ++iter)
+    {
+        str += (*iter)->toString();
+        if(iter != lastPos)
+            str += " & ";
+    }
+    return str + ")";
 }
+
 BoolValue BoolAnd::value() const {
     bool hasDontCare = false;
     for(auto &op:operands)
@@ -34,6 +72,11 @@ BoolValue BoolAnd::value() const {
         return BoolValue::DontCare;
     return BoolValue::One;
 }
+
+bool BoolAnd::isAnd() const {
+    return true;
+}
+
 
 BoolType* BoolAnd::clone() const {
     return new BoolAnd(*this);

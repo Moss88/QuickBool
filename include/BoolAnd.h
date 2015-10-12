@@ -1,7 +1,8 @@
 #ifndef BOOLAND_H
 #define BOOLAND_H
-#include "BoolExpr.h"
-class BoolAnd : public BoolExpr {
+#include "BoolNaryExpr.h"
+class BoolFunc;
+class BoolAnd : public BoolNaryExpr {
 public:
     BoolAnd() = default;
     BoolAnd(const BoolType& a, const BoolType& b);
@@ -11,7 +12,7 @@ public:
     std::string toString() const;
     BoolValue value() const;
     BoolType* clone() const;
-
+    bool isAnd() const;
 };
 
 #endif // BOOLAND_H

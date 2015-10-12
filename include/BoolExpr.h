@@ -3,6 +3,7 @@
 #include <vector>
 #include "BoolBasicDefs.h"
 #include "BoolType.h"
+
 class BoolExpr : public BoolType {
 public:
     virtual std::vector<UBoolType>::iterator begin() {
@@ -25,13 +26,11 @@ public:
         return operands.size();
     }
 
-    bool isVar() const {
-        return false;
-    }
-
     bool isExpr() const {
         return true;
     }
+
+
 
 protected:
     std::vector<UBoolType> operands;

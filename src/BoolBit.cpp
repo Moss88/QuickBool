@@ -7,10 +7,6 @@ bool BoolBit::isVar() const {
     return true;
 }
 
-bool BoolBit::isExpr() const {
-    return false;
-}
-
 std::string BoolBit::toString() const {
     return bb->getName() + "[" + std::to_string(bb->getIndex()) + "]";
 }
@@ -47,10 +43,6 @@ BoolBitShared::BoolBitShared(const BoolBitShared& other) {
 
 bool BoolBitShared::isVar() const {
     return true;
-}
-
-bool BoolBitShared::isExpr() const {
-    return false;
 }
 
 std::string BoolBitShared::toString() const {

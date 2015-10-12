@@ -7,6 +7,7 @@ class BoolFunc {
 public:
     BoolFunc() = default;
     BoolFunc(std::unique_ptr<BoolType> pVal);
+    BoolFunc(const BoolType *pVal);
     BoolFunc(bool val);
     BoolFunc(const BoolFunc& func);
     BoolFunc(BoolFunc&& func);
@@ -17,7 +18,6 @@ public:
     BoolFunc operator=(BoolFunc&& func);
 
     BoolFunc operator&=(const BoolFunc& func);
-    BoolFunc operator&=(const BoolType& func) const;
     BoolFunc operator&(const BoolFunc& func) const;
     BoolFunc operator&(const BoolType& func) const;
     BoolFunc operator|(const BoolFunc& func) const;
@@ -25,6 +25,8 @@ public:
 
     BoolFunc operator!() const;
     BoolValue evaluate() const;
+    bool isExpr() const;
+    bool isVar() const;
     const BoolType* get() const;
     BoolType* get();
     std::string toString() const;

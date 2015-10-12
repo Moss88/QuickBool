@@ -24,6 +24,10 @@ BoolValue BoolNot::value() const {
         return val;
 }
 
+bool BoolNot::isNot() const {
+    return true;
+}
+
 BoolType* BoolNot::clone() const {
     return new BoolNot(*this);
 }

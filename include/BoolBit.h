@@ -10,7 +10,6 @@ public:
             BoolValue val = BoolValue::Unknown);
     BoolBitShared(const BoolBitShared& other);
     virtual bool isVar() const;
-    virtual bool isExpr() const;
     virtual std::string toString() const;
     virtual BoolValue value() const;
     unsigned int getIndex() const;
@@ -30,7 +29,6 @@ public:
     BoolBit(std::shared_ptr<BoolBitShared> bb);
     void setValue(BoolValue val);
     bool isVar() const;
-    bool isExpr() const;
     std::string toString() const;
     BoolValue value() const;
     BoolType* clone() const;

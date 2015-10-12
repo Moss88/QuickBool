@@ -25,6 +25,11 @@ BoolFunc::BoolFunc(BoolFunc&& func) {
     this->bValue = move(func.bValue);
 }
 
+BoolFunc::BoolFunc(const BoolType *pVal) {
+    this->bValue = unique_ptr<BoolType>(pVal->clone());
+}
+
+
 BoolFunc BoolFunc::operator=(const BoolFunc& func) {
     if(this == &func)
         return *this;
@@ -37,29 +42,49 @@ BoolFunc BoolFunc::operator=(BoolFunc&& func) {
     return *this;
 }
 
-
-
 BoolFunc BoolFunc::operator&=(const BoolFunc& func) {
+    if(func.get()->isOne())
+        return *this;
+    else if(func.get()->isZero() | this->get()->isZero())
+        return BoolFunc(false);
+
     unique_ptr<BoolAnd> newFunc = unique_ptr<BoolAnd>(new BoolAnd(std::move(this->bValue), *func.bValue));
     this->bValue = move(newFunc);
     return *this;
 }
 
+BoolFunc BoolFunc::operator&(const BoolFunc& other) const {
+    if(other.get()->isOne())
+        return *this;
+    else if(other.get()->isZero() | this->get()->isZero())
+        return BoolFunc(false);
+    return BoolFunc(unique_ptr<BoolAnd>(new BoolAnd(*this->bValue, *other.bValue)));
+}
+
 BoolFunc BoolFunc::operator|=(const BoolFunc& func) {
+    if(func.get()->isZero())
+        return *this;
+    else if(func.get()->isOne() | this->get()->isOne())
+        return BoolFunc(true);
+
     unique_ptr<BoolOr> newFunc = unique_ptr<BoolOr>(new BoolOr(std::move(this->bValue), *func.bValue));
     this->bValue = move(newFunc);
     return *this;
 }
 
-BoolFunc BoolFunc::operator&(const BoolFunc& other) const {
-    return BoolFunc(unique_ptr<BoolAnd>(new BoolAnd(*this->bValue, *other.bValue)));
-}
-
 BoolFunc BoolFunc::operator|(const BoolFunc& other) const {
+    if(other.get()->isZero())
+        return *this;
+    else if(other.get()->isOne() | this->get()->isOne())
+        return BoolFunc(true);
     return BoolFunc(unique_ptr<BoolOr>(new BoolOr(*this->bValue, *other.bValue)));
 }
 
 BoolFunc BoolFunc::operator!() const {
+    if(this->get()->isZero())
+        return BoolFunc(true);
+    else if(this->get()->isOne())
+        return BoolFunc(false);
     return BoolFunc(unique_ptr<BoolNot>(new BoolNot(*this->bValue)));
 }
 
@@ -77,4 +102,11 @@ std::string BoolFunc::toString() const {
 
 BoolValue BoolFunc::evaluate() const {
     return this->bValue->value();
+}
+
+bool BoolFunc::isExpr() const {
+    return this->bValue->isExpr();
+}
+bool BoolFunc::isVar() const {
+    return this->bValue->isVar();
 }

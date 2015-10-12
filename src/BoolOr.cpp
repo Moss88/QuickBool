@@ -18,8 +18,15 @@ BoolOr::BoolOr(const BoolOr& other) {
 
 
 std::string BoolOr::toString() const {
-    return "(" + operands.front()->toString() + " | " +
-                 operands.back()->toString() + ")";
+    std::string str = "(";
+    auto lastPos = operands.cend() - 1;
+    for(auto iter = operands.cbegin(); iter != operands.cend(); ++iter)
+    {
+        str += (*iter)->toString();
+        if(iter != lastPos)
+            str += " | ";
+    }
+    return str + ")";
 }
 
 BoolValue BoolOr::value() const {
@@ -35,6 +42,11 @@ BoolValue BoolOr::value() const {
         return BoolValue::DontCare;
     return BoolValue::Zero;
 }
+
+bool BoolOr::isOr() const {
+    return true;
+}
+
 
 BoolType* BoolOr::clone() const {
     return new BoolOr(*this);

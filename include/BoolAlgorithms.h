@@ -3,6 +3,7 @@
 #include "BoolFunc.h"
 #include "BoolExpr.h"
 #include <functional>
+class BoolManager;
 namespace BoolAlgo {
 
 
@@ -29,7 +30,14 @@ void depthTraversal(BFunc& expr, Func func) {
         depthRecur(expr.get(), func);
 }
 
-//void depthTraversal(BFunc& expr, std::function<bool(BoolType*)> func);
+template<typename Func>
+void depthTraversal(BoolType& expr, Func func) {
+    depthRecur(&expr, func);
+}
+
+BoolFunc generateCNF(const BoolFunc& func, std::string prefix, BoolManager& bMan);
+bool isCNF(const BoolFunc &func);
+
 }
 
 #endif // BOOLALGORITHMS_H
