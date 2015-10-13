@@ -2,6 +2,7 @@
 #define BOOLFUNC_H
 #include "BoolBasicDefs.h"
 #include "BoolType.h"
+#include <iostream>
 
 class BoolFunc {
 public:
@@ -21,7 +22,9 @@ public:
     BoolFunc operator&(const BoolFunc& func) const;
     BoolFunc operator&(const BoolType& func) const;
     BoolFunc operator|(const BoolFunc& func) const;
+    BoolFunc operator|(const BoolType& func) const;
     BoolFunc operator|=(const BoolFunc& func);
+    BoolFunc operator|=(const BoolType& func);
 
     BoolFunc operator!() const;
     BoolValue evaluate() const;
@@ -34,6 +37,8 @@ public:
 private:
     UBoolType bValue;
 };
+
+std::ostream& operator<<(std::ostream &stream, const BoolFunc& func);
 /*
 BoolFunc operator!(const BoolBit& a);
 BoolFunc operator|(const BoolBit& a, const BoolBit& b);

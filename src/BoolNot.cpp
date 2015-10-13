@@ -11,7 +11,7 @@ BoolNot::BoolNot(const BoolNot& a) {
 
 
 std::string BoolNot::toString() const {
-    return "!(" + this->operands.front()->toString() +")";
+    return "!" + this->operands.front()->toString();
 }
 
 BoolValue BoolNot::value() const {

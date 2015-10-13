@@ -34,7 +34,6 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
         ptrs.pop();
 
         const BoolExpr* expr = std::get<0>(parent);
-        std::cout << "Processing: " << expr->toString() << std::endl;
         BoolFunc tempVar(std::get<1>(parent));
         assert(expr);
 
@@ -46,7 +45,6 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
             {
                 const BoolExpr* opExpr = dynamic_cast<const BoolExpr*>(op.get());
                 BoolFunc bit = bMan.getBit(prefix, cnt++);
-                std::cout << "About to push back: " << opExpr->toString() << std::endl;
                 ptrs.push(std::make_tuple(opExpr, bit));
                 operands.push_back(bit);
             }
@@ -57,17 +55,21 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
         // Process Operands
         if(const BoolAnd* exprPtr = dynamic_cast<const BoolAnd*>(func.get()))
         {
-            assert(exprPtr->size() == 2);
-            CNF &= (tempVar | !operands.front() | !operands.back()) &
-                   (!tempVar | operands.front()) &
-                   (!tempVar | operands.back()) ;
+            BoolFunc term(false);
+            for(auto &op:*exprPtr)
+                CNF &= !tempVar | (*op);
+            for(auto &op:*exprPtr)
+                term |= BoolNot(*op);
+            CNF &= term | tempVar;
         }
         else if(const BoolOr* exprPtr = dynamic_cast<const BoolOr*>(func.get()))
         {
-            assert(exprPtr->size() == 2);
-            CNF &= (tempVar | operands.front() | operands.back()) &
-                   (!tempVar | !operands.front()) &
-                   (!tempVar | !operands.back()) ;
+            BoolFunc term(false);
+            for(auto &op:*exprPtr)
+                CNF &= tempVar | BoolNot(*op);
+            for(auto &op:*exprPtr)
+                term |= *op;
+            CNF &= term | !tempVar;
         }
         else if(const BoolNot* exprPtr = dynamic_cast<const BoolNot*>(func.get()))
         {

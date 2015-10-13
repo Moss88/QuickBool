@@ -2,13 +2,43 @@
 
 using std::unique_ptr;
 BoolOr::BoolOr(unique_ptr<BoolType> a, const BoolType &b) {
-    this->operands.push_back(move(a));
-    this->operands.push_back(unique_ptr<BoolType>(b.clone()));
+    if(a.get()->isOr())
+    {
+        BoolOr* andPtr = static_cast<BoolOr*>(a.get());
+        for(auto &op:*andPtr)
+            this->operands.push_back(move(op));
+    }
+    else
+        this->operands.push_back(move(a));
+
+    if(b.isOr())
+    {
+        const BoolOr* ptr = static_cast<const BoolOr*>(&b);
+        for(auto &op:*ptr)
+            this->operands.push_back(std::unique_ptr<BoolType>(op.get()->clone()));
+    }
+    else
+        this->operands.push_back(unique_ptr<BoolType>(b.clone()));
 }
 
 BoolOr::BoolOr(const BoolType& a, const BoolType& b) {
-    this->operands.push_back(unique_ptr<BoolType>(a.clone()));
-    this->operands.push_back(unique_ptr<BoolType>(b.clone()));
+    if(a.isOr())
+    {
+        const BoolOr* ptr = static_cast<const BoolOr*>(&a);
+        for(auto &op:*ptr)
+            this->operands.push_back(std::unique_ptr<BoolType>(op.get()->clone()));
+    }
+    else
+        this->operands.push_back(unique_ptr<BoolType>(a.clone()));
+
+    if(b.isOr())
+    {
+        const BoolOr* ptr = static_cast<const BoolOr*>(&b);
+        for(auto &op:*ptr)
+            this->operands.push_back(std::unique_ptr<BoolType>(op.get()->clone()));
+    }
+    else
+        this->operands.push_back(unique_ptr<BoolType>(b.clone()));
 }
 
 BoolOr::BoolOr(const BoolOr& other) {

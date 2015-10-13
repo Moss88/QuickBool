@@ -45,6 +45,11 @@ BoolFunc BoolFunc::operator=(BoolFunc&& func) {
 BoolFunc BoolFunc::operator&=(const BoolFunc& func) {
     if(func.get()->isOne())
         return *this;
+    else if(this->get()->isOne())
+    {
+        *this = func;
+        return *this;
+    }
     else if(func.get()->isZero() | this->get()->isZero())
         return BoolFunc(false);
 
@@ -56,6 +61,8 @@ BoolFunc BoolFunc::operator&=(const BoolFunc& func) {
 BoolFunc BoolFunc::operator&(const BoolFunc& other) const {
     if(other.get()->isOne())
         return *this;
+    else if(this->get()->isOne())
+        return other;
     else if(other.get()->isZero() | this->get()->isZero())
         return BoolFunc(false);
     return BoolFunc(unique_ptr<BoolAnd>(new BoolAnd(*this->bValue, *other.bValue)));
@@ -64,6 +71,11 @@ BoolFunc BoolFunc::operator&(const BoolFunc& other) const {
 BoolFunc BoolFunc::operator|=(const BoolFunc& func) {
     if(func.get()->isZero())
         return *this;
+    else if(this->get()->isZero())
+    {
+        *this = func;
+        return *this;
+    }
     else if(func.get()->isOne() | this->get()->isOne())
         return BoolFunc(true);
 
@@ -72,13 +84,42 @@ BoolFunc BoolFunc::operator|=(const BoolFunc& func) {
     return *this;
 }
 
+BoolFunc BoolFunc::operator|=(const BoolType& func) {
+    if(func.isZero())
+        return *this;
+    else if(this->get()->isZero())
+    {
+        *this = BoolFunc(&func);
+        return *this;
+    }
+    else if(func.isOne() | this->get()->isOne())
+        return BoolFunc(true);
+
+    unique_ptr<BoolOr> newFunc = unique_ptr<BoolOr>(new BoolOr(std::move(this->bValue), func));
+    this->bValue = move(newFunc);
+    return *this;
+}
+
 BoolFunc BoolFunc::operator|(const BoolFunc& other) const {
     if(other.get()->isZero())
         return *this;
+    else if(this->get()->isZero())
+        return other;
     else if(other.get()->isOne() | this->get()->isOne())
         return BoolFunc(true);
     return BoolFunc(unique_ptr<BoolOr>(new BoolOr(*this->bValue, *other.bValue)));
 }
+
+BoolFunc BoolFunc::operator|(const BoolType& other) const {
+    if(other.isZero())
+        return *this;
+    //else if(this->get()->isZero())
+    //    return BoolFunc(&other);
+    else if(other.isOne() | this->get()->isOne())
+        return BoolFunc(true);
+    return BoolFunc(unique_ptr<BoolOr>(new BoolOr(*this->bValue, other)));
+}
+
 
 BoolFunc BoolFunc::operator!() const {
     if(this->get()->isZero())
@@ -109,4 +150,9 @@ bool BoolFunc::isExpr() const {
 }
 bool BoolFunc::isVar() const {
     return this->bValue->isVar();
+}
+
+std::ostream& operator<<(std::ostream &stream, const BoolFunc& func) {
+    stream << func.toString();
+    return stream;
 }
