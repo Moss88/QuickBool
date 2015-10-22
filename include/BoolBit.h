@@ -34,6 +34,7 @@ public:
     BoolType* clone() const;
     unsigned int getIndex() const;
     std::string getName() const;
+
 private:
     std::shared_ptr<BoolBitShared> bb;
 };

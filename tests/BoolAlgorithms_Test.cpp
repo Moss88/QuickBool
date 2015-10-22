@@ -11,14 +11,18 @@ TEST(BoolAlgo, isCNF) {
     BoolFunc c = bm.getBit("c");
     BoolFunc d = bm.getBit("c");
 
-    BoolFunc eq = a & b;
-    EXPECT_TRUE(BoolAlgo::isCNF(eq));
-    eq |= c;
-    EXPECT_FALSE(BoolAlgo::isCNF(eq));
+    BoolFunc eq = (a | b);
+    EXPECT_TRUE(BoolAlgo::isCNF(eq)) << "Failed CNF: "
+                                     << eq;
+    eq = a | (c & b);
+    EXPECT_FALSE(BoolAlgo::isCNF(eq)) << "Failed CNF: "
+                                      << eq;
     eq = (a | b) & (!a | c);
-    EXPECT_TRUE(BoolAlgo::isCNF(eq));
+    EXPECT_TRUE(BoolAlgo::isCNF(eq)) << "Failed CNF: "
+                                     << eq;
     eq = (a | b) & (!a | c) & !d;
-    EXPECT_TRUE(BoolAlgo::isCNF(eq));
+    EXPECT_TRUE(BoolAlgo::isCNF(eq)) << "Failed CNF: "
+                                     << eq;
 }
 
 TEST(BoolAlgo, CNF) {
@@ -29,7 +33,8 @@ TEST(BoolAlgo, CNF) {
 
     BoolFunc eq = a & b & c;
     BoolFunc cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
-    EXPECT_TRUE(BoolAlgo::isCNF(cnf));
+    EXPECT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+                                      << cnf;
     bm.setValue(BoolValue::One, "a");
     bm.setValue(BoolValue::One, "b");
     bm.setValue(BoolValue::One, "c");
@@ -56,5 +61,18 @@ TEST(BoolAlgo, CNF) {
     eq = (a | b) & !c;
     cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
     EXPECT_TRUE(BoolAlgo::isCNF(cnf));
+}
+
+
+TEST(BoolAlgo, isSat) {
+    BoolManager bm;
+    BoolFunc a = bm.getBit("a");
+    BoolFunc b = bm.getBit("b");
+    BoolFunc c = bm.getBit("c");
+
+    BoolFunc eq = a & (b | c);
+    BoolFunc cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
+    EXPECT_TRUE(BoolAlgo::isCNF(cnf));
+    BoolAlgo::isSat(cnf);
 }
 

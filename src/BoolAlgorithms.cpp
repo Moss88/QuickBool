@@ -10,6 +10,8 @@
 #include <string>
 #include <stack>
 #include <tuple>
+#include <map>
+#include <sstream>
 #include <cassert>
 
 using std::string;
@@ -83,29 +85,104 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
     return CNF;
 }
 
+bool isCNFNotTerm(const BoolNot* expr) {
+    return expr->begin()->get()->isVar();
+}
+
+bool isCNFOrTerm(const BoolOr* expr) {
+    for(auto &literal:*expr)
+    {
+        if(literal->isNot() &&
+           !isCNFNotTerm(static_cast<const BoolNot*>(literal.get())))
+            return false;
+        else if(!literal->isVar())
+            return false;
+    }
+    return true;
+}
+
 bool isCNF(const BoolFunc &func) {
     if(!func.isExpr())
         return false;
+    else if(func.get()->isOr())
+       return isCNFOrTerm(static_cast<const BoolOr*>(func.get()));
 
-    if(!func.get()->isAnd())
-        return false;
 
     const BoolAnd* ptr = static_cast<const BoolAnd*>(func.get());
-    bool noAnd = true;
     for(auto &op:*ptr)
     {
-        depthTraversal(*op, [&](BoolType* element){
-            if(element->isAnd())
-            {
-                noAnd = false;
-                return false;
-            }
-            return true;
-        });
-
+        if(op->isOr() && !isCNFOrTerm(static_cast<const BoolOr*>(op.get())))
+            return false;
     }
-    return noAnd;
+    return true;
 }
+
+struct BoolBitCmp{
+    bool operator()(const BoolBit* a, const BoolBit *b)
+    {
+        int cmpResult = a->getName().compare(b->getName());
+        return (cmpResult < 0) ||
+               ((cmpResult == 0) && (a->getIndex() < b->getIndex()));
+    }
+};
+
+std::vector<BoolValue> isSat(const BoolFunc& func) {
+    // Get Unique Ids for all bits
+    std::cout << "Processing " << func << std::endl;
+    unsigned int idCnt = 0;
+    std::map<const BoolBit*, unsigned int, BoolBitCmp> bitId;
+    auto addBits = [&](const BoolType *operand){
+        if(operand->isVar())
+        {
+            auto rIter = bitId.find(static_cast<const BoolBit*>(operand));
+            if(rIter == bitId.end())
+                bitId[static_cast<const BoolBit*>(operand)] = idCnt++;
+        }
+        return true;
+    };
+    depthTraversal(func, addBits);
+    const BoolAnd* andExpr = dynamic_cast<const BoolAnd*>(func.get());
+    if(!andExpr)
+        throw std::runtime_error("IsSat: function is not CNF, expression not and");
+    std::stringstream buffer;
+    for(auto &term:*andExpr)
+    {
+        const BoolOr* orExpr = dynamic_cast<const BoolOr*>(term.get());
+        if(!orExpr)
+            throw std::runtime_error("IsSat: function is not CNF, expression not or");
+        for(auto &op:*orExpr)
+        {
+            if(op->isExpr())
+            {
+                const BoolNot* notOp = dynamic_cast<const BoolNot*>(op.get());
+                const BoolBit* bit = dynamic_cast<const BoolBit*>(notOp->begin()->get());
+                std::cout << "Got here" << std::endl;
+                buffer << bitId[bit] << " ";
+                std::cout << "Made it past" << std::endl;
+
+            }
+            else if(op->isVar())
+            {
+                std::cout << "Got here" << std::endl;
+                if(!op)
+                    throw std::runtime_error("Error nullptr for operand type");
+                if(!op.get())
+                    throw std::runtime_error("Error nullptr for operand type");
+                const BoolBit* bit = dynamic_cast<const BoolBit*>(op.get());
+                std::cout << "past dynamic cast" << std::endl;
+
+                if(!bit)
+                    throw std::runtime_error("Error nullptr for bit type");
+                buffer << bitId[bit] << " ";
+                std::cout << "Made it past" << std::endl;
+            }
+        }
+        buffer << std::endl;
+    }
+    std::cout << buffer.str() << std::endl;
+    return std::vector<BoolValue>();
+}
+
 
 }
 
