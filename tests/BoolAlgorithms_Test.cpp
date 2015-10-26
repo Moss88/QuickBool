@@ -23,6 +23,9 @@ TEST(BoolAlgo, isCNF) {
     eq = (a | b) & (!a | c) & !d;
     EXPECT_TRUE(BoolAlgo::isCNF(eq)) << "Failed CNF: "
                                      << eq;
+    eq = (a | b) & !(a | c);
+    EXPECT_FALSE(BoolAlgo::isCNF(eq)) << "Failed CNF: "
+                                      << eq;
 }
 
 TEST(BoolAlgo, CNF) {
@@ -33,7 +36,7 @@ TEST(BoolAlgo, CNF) {
 
     BoolFunc eq = a & b & c;
     BoolFunc cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
-    EXPECT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+    ASSERT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
                                       << cnf;
     bm.setValue(BoolValue::One, "a");
     bm.setValue(BoolValue::One, "b");
@@ -60,7 +63,13 @@ TEST(BoolAlgo, CNF) {
 
     eq = (a | b) & !c;
     cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
-    EXPECT_TRUE(BoolAlgo::isCNF(cnf));
+    EXPECT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+                                      << cnf;
+
+    eq = a & (b | c);
+    cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
+    EXPECT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+                                      << cnf;
 }
 
 
@@ -72,7 +81,15 @@ TEST(BoolAlgo, isSat) {
 
     BoolFunc eq = a & (b | c);
     BoolFunc cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
-    EXPECT_TRUE(BoolAlgo::isCNF(cnf));
-    BoolAlgo::isSat(cnf);
+    ASSERT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+                                      << cnf;
+    EXPECT_TRUE(BoolAlgo::isSat(cnf));
+
+    eq = a & !a;
+    cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
+    cout << "CNF form: " << cnf << std::endl;
+    ASSERT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+                                      << cnf;
+    EXPECT_FALSE(BoolAlgo::isSat(cnf));
 }
 

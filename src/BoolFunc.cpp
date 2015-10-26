@@ -126,6 +126,9 @@ BoolFunc BoolFunc::operator!() const {
         return BoolFunc(true);
     else if(this->get()->isOne())
         return BoolFunc(false);
+    else if(this->get()->isNot())
+        return BoolFunc(unique_ptr<BoolType>(static_cast<const BoolNot*>(this->get())->begin()->get()->clone()));
+
     return BoolFunc(unique_ptr<BoolNot>(new BoolNot(*this->bValue)));
 }
 

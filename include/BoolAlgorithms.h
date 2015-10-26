@@ -37,7 +37,7 @@ void depthTraversal(BoolType& expr, Func func) {
 
 BoolFunc generateCNF(const BoolFunc& func, std::string prefix, BoolManager& bMan);
 bool isCNF(const BoolFunc &func);
-std::vector<BoolValue> isSat(const BoolFunc& func);
+bool isSat(const BoolFunc& func);
 
 
 

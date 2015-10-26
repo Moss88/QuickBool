@@ -13,6 +13,7 @@
 #include <map>
 #include <sstream>
 #include <cassert>
+#include <unistd.h>
 
 using std::string;
 using std::stack;
@@ -52,32 +53,34 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
             }
             else
                 operands.push_back(BoolFunc(op.get()));
+
         }
 
         // Process Operands
-        if(const BoolAnd* exprPtr = dynamic_cast<const BoolAnd*>(func.get()))
+        if(func.get()->isAnd())
         {
             BoolFunc term(false);
-            for(auto &op:*exprPtr)
-                CNF &= !tempVar | (*op);
-            for(auto &op:*exprPtr)
-                term |= BoolNot(*op);
+            for(auto &op:operands)
+                CNF &= !tempVar | op;
+            for(auto &op:operands)
+                term |= !op;
             CNF &= term | tempVar;
         }
-        else if(const BoolOr* exprPtr = dynamic_cast<const BoolOr*>(func.get()))
+        else if(func.get()->isOr())
         {
             BoolFunc term(false);
-            for(auto &op:*exprPtr)
-                CNF &= tempVar | BoolNot(*op);
-            for(auto &op:*exprPtr)
-                term |= *op;
+            for(auto &op:operands)
+                CNF &= tempVar | !BoolFunc(op.get());
+
+            for(auto &op:operands)
+                term |= op;
             CNF &= term | !tempVar;
         }
-        else if(const BoolNot* exprPtr = dynamic_cast<const BoolNot*>(func.get()))
+        else if(func.get()->isNot())
         {
-            assert(exprPtr->size() == 1);
-            CNF &= (!std::get<1>(parent) | !operands.front()) &
-                   (std::get<1>(parent) | operands.back());
+            assert(operands.size() == 1);
+            CNF &= (!tempVar | !operands.front()) &
+                   (tempVar | operands.front());
         }
         else
             throw std::runtime_error("Unknown expression type for CNF generation");
@@ -92,10 +95,8 @@ bool isCNFNotTerm(const BoolNot* expr) {
 bool isCNFOrTerm(const BoolOr* expr) {
     for(auto &literal:*expr)
     {
-        if(literal->isNot() &&
-           !isCNFNotTerm(static_cast<const BoolNot*>(literal.get())))
-            return false;
-        else if(!literal->isVar())
+        if((literal->isNot() && !isCNFNotTerm(static_cast<const BoolNot*>(literal.get()))) ||
+          (!literal->isNot() && !literal->isVar()))
             return false;
     }
     return true;
@@ -104,14 +105,17 @@ bool isCNFOrTerm(const BoolOr* expr) {
 bool isCNF(const BoolFunc &func) {
     if(!func.isExpr())
         return false;
-    else if(func.get()->isOr())
+    if(func.get()->isOr())
        return isCNFOrTerm(static_cast<const BoolOr*>(func.get()));
-
+    else if(!func.get()->isAnd())
+       return false;
 
     const BoolAnd* ptr = static_cast<const BoolAnd*>(func.get());
     for(auto &op:*ptr)
     {
         if(op->isOr() && !isCNFOrTerm(static_cast<const BoolOr*>(op.get())))
+            return false;
+        else if(op->isNot() && !isCNFNotTerm(static_cast<const BoolNot*>(op.get())))
             return false;
     }
     return true;
@@ -126,10 +130,71 @@ struct BoolBitCmp{
     }
 };
 
-std::vector<BoolValue> isSat(const BoolFunc& func) {
+
+bool runLingelingSat(std::string &&dimacsStr) {
+    int p2cFD[2];
+    int c2pFD[2];
+
+    if(pipe(p2cFD) == -1)
+        std::perror("BoolAlgorithms.runLinglingSat: Failed to generate p2cFD pipe");
+
+    if(pipe(c2pFD) == -1)
+        std::perror("BoolAlgorithms.runLinglingSat: Failed to generate c2pFD pipe");
+
+    FILE *fp = popen("which lingeling", "r");
+
+    char path[256];
+    if(fgets(path, 256, fp) == nullptr)
+        throw std::runtime_error("BoolAlgorithms: Failed to get pipe path");
+    pclose(fp);
+    string filePath = path;
+
+
+    // Fork
+    if(!fork())
+    {
+        dup2(c2pFD[1], 1);
+        close(c2pFD[0]);
+        close(c2pFD[1]);
+        dup2(p2cFD[0], 0);
+        close(p2cFD[0]);
+        close(p2cFD[1]);
+
+        int error = execl((filePath.substr(0,filePath.length() - 1)).c_str(), (filePath.substr(0,filePath.length() - 1)).c_str(), NULL);
+        if(error == -1)
+            throw std::runtime_error("isSat process error " + std::to_string(error));
+    }
+    else
+    {
+        char buffer[256];
+        close(p2cFD[0]);
+        close(c2pFD[1]);
+        if(write(p2cFD[1], dimacsStr.c_str(), dimacsStr.length()) == -1)
+            std::perror("BoolAlgorithms.runLinglingSat: Failed to write to pipe");
+
+        close(p2cFD[1]);
+        FILE *in = fdopen(c2pFD[0], "r");
+        while (fgets(buffer, 256, in))
+        {
+            if(buffer[0] == 's')
+            {
+                string str(buffer);
+                size_t idx = str.find("UNSATISFIABLE");
+                if(idx == string::npos)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        close(c2pFD[0]);
+    }
+    return true;
+}
+
+
+bool isSat(const BoolFunc& func) {
     // Get Unique Ids for all bits
-    std::cout << "Processing " << func << std::endl;
-    unsigned int idCnt = 0;
+    unsigned int idCnt = 1;
     std::map<const BoolBit*, unsigned int, BoolBitCmp> bitId;
     auto addBits = [&](const BoolType *operand){
         if(operand->isVar())
@@ -145,6 +210,7 @@ std::vector<BoolValue> isSat(const BoolFunc& func) {
     if(!andExpr)
         throw std::runtime_error("IsSat: function is not CNF, expression not and");
     std::stringstream buffer;
+    unsigned int nClauses = 0;
     for(auto &term:*andExpr)
     {
         const BoolOr* orExpr = dynamic_cast<const BoolOr*>(term.get());
@@ -156,31 +222,28 @@ std::vector<BoolValue> isSat(const BoolFunc& func) {
             {
                 const BoolNot* notOp = dynamic_cast<const BoolNot*>(op.get());
                 const BoolBit* bit = dynamic_cast<const BoolBit*>(notOp->begin()->get());
-                std::cout << "Got here" << std::endl;
                 buffer << bitId[bit] << " ";
-                std::cout << "Made it past" << std::endl;
 
             }
             else if(op->isVar())
             {
-                std::cout << "Got here" << std::endl;
-                if(!op)
-                    throw std::runtime_error("Error nullptr for operand type");
-                if(!op.get())
-                    throw std::runtime_error("Error nullptr for operand type");
-                const BoolBit* bit = dynamic_cast<const BoolBit*>(op.get());
-                std::cout << "past dynamic cast" << std::endl;
-
-                if(!bit)
-                    throw std::runtime_error("Error nullptr for bit type");
+                const BoolBit* bit = static_cast<const BoolBit*>(op.get());
                 buffer << bitId[bit] << " ";
-                std::cout << "Made it past" << std::endl;
             }
         }
-        buffer << std::endl;
+        buffer << "0" << std::endl;
+        ++nClauses;
     }
-    std::cout << buffer.str() << std::endl;
-    return std::vector<BoolValue>();
+
+
+    bool satResult = runLingelingSat("p cnf " + std::to_string(bitId.size()) + " " +
+                                     std::to_string(nClauses) + "\n" + buffer.str());
+
+    std::string dimacFile = "p cnf " + std::to_string(bitId.size()) + " " +
+                            std::to_string(nClauses) + "\n" + buffer.str();
+    std::cout << dimacFile << std::endl;
+
+    return satResult;
 }
 
 
