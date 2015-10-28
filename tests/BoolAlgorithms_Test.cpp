@@ -83,13 +83,20 @@ TEST(BoolAlgo, isSat) {
     BoolFunc cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
     ASSERT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
                                       << cnf;
-    EXPECT_TRUE(BoolAlgo::isSat(cnf));
+    EXPECT_TRUE(BoolAlgo::isSat(cnf).size());
+
 
     eq = a & !a;
     cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
-    cout << "CNF form: " << cnf << std::endl;
     ASSERT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
                                       << cnf;
-    EXPECT_FALSE(BoolAlgo::isSat(cnf));
+    EXPECT_FALSE(BoolAlgo::isSat(cnf).size());
+
+    eq = a | b | !a;
+    cnf = BoolAlgo::generateCNF(eq, "tmp", bm);
+    ASSERT_TRUE(BoolAlgo::isCNF(cnf)) << "Failed CNF: "
+                                      << cnf;
+    EXPECT_TRUE(BoolAlgo::isSat(cnf).size());
+
 }
 

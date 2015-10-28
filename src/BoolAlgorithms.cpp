@@ -31,6 +31,7 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
     stack<tuple<const BoolExpr*, BoolFunc>> ptrs;
     ptrs.push(std::make_tuple(dynamic_cast<const BoolExpr*>(func.get()),
                               bMan.getBit(prefix, cnt++)));
+    BoolFunc topVar = std::get<1>(ptrs.top());
     while(!ptrs.empty())
     {
         tuple<const BoolExpr*, BoolFunc> parent = ptrs.top();
@@ -39,6 +40,7 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
         const BoolExpr* expr = std::get<0>(parent);
         BoolFunc tempVar(std::get<1>(parent));
         assert(expr);
+        std::cout << "Processing Expression: " << expr->toString() << std::endl;
 
         vector<BoolFunc> operands;
         for(auto &op:*expr)
@@ -50,6 +52,7 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
                 BoolFunc bit = bMan.getBit(prefix, cnt++);
                 ptrs.push(std::make_tuple(opExpr, bit));
                 operands.push_back(bit);
+                std::cout << "Is expression: " << opExpr->toString() << std::endl;
             }
             else
                 operands.push_back(BoolFunc(op.get()));
@@ -57,7 +60,7 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
         }
 
         // Process Operands
-        if(func.get()->isAnd())
+        if(expr->isAnd())
         {
             BoolFunc term(false);
             for(auto &op:operands)
@@ -66,7 +69,7 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
                 term |= !op;
             CNF &= term | tempVar;
         }
-        else if(func.get()->isOr())
+        else if(expr->isOr())
         {
             BoolFunc term(false);
             for(auto &op:operands)
@@ -76,16 +79,19 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
                 term |= op;
             CNF &= term | !tempVar;
         }
-        else if(func.get()->isNot())
+        else if(expr->isNot())
         {
+            std::cout << "Is not expression" << std::endl;
             assert(operands.size() == 1);
             CNF &= (!tempVar | !operands.front()) &
                    (tempVar | operands.front());
+            std::cout << "Not Expresion: " << ((!tempVar | !operands.front()) & (tempVar | operands.front())) << std::endl;
         }
         else
             throw std::runtime_error("Unknown expression type for CNF generation");
     }
-    return CNF;
+    return CNF & topVar;
+    //return CNF;
 }
 
 bool isCNFNotTerm(const BoolNot* expr) {
@@ -131,7 +137,7 @@ struct BoolBitCmp{
 };
 
 
-bool runLingelingSat(std::string &&dimacsStr) {
+vector<int> runLingelingSat(std::string &&dimacsStr) {
     int p2cFD[2];
     int c2pFD[2];
 
@@ -180,19 +186,31 @@ bool runLingelingSat(std::string &&dimacsStr) {
             {
                 string str(buffer);
                 size_t idx = str.find("UNSATISFIABLE");
-                if(idx == string::npos)
-                    return true;
-                else
-                    return false;
+                if(idx != string::npos)
+                    return vector<int>();
+            }
+            else if(buffer[0] == 'v')
+            {
+                vector<int> solution;
+                buffer[0] = ' ';
+                std::stringstream ss(buffer);
+                int num = 1;
+                while(!ss.eof() && num != 0)
+                {
+                    ss >> num;
+                    if(num != 0)
+                        solution.push_back(num);
+                }
+                return move(solution);
             }
         }
         close(c2pFD[0]);
     }
-    return true;
+    return vector<int>();
 }
 
 
-bool isSat(const BoolFunc& func) {
+vector<int> isSat(const BoolFunc& func) {
     // Get Unique Ids for all bits
     unsigned int idCnt = 1;
     std::map<const BoolBit*, unsigned int, BoolBitCmp> bitId;
@@ -213,37 +231,39 @@ bool isSat(const BoolFunc& func) {
     unsigned int nClauses = 0;
     for(auto &term:*andExpr)
     {
-        const BoolOr* orExpr = dynamic_cast<const BoolOr*>(term.get());
-        if(!orExpr)
-            throw std::runtime_error("IsSat: function is not CNF, expression not or");
-        for(auto &op:*orExpr)
+        if(term->isVar())
         {
-            if(op->isExpr())
+            const BoolBit* bit = static_cast<const BoolBit*>(term.get());
+            buffer << bitId[bit] << " ";
+        }
+        else if(term->isOr())
+        {
+            const BoolOr* orExpr = static_cast<const BoolOr*>(term.get());
+            for(auto &op:*orExpr)
             {
-                const BoolNot* notOp = dynamic_cast<const BoolNot*>(op.get());
-                const BoolBit* bit = dynamic_cast<const BoolBit*>(notOp->begin()->get());
-                buffer << bitId[bit] << " ";
+                if(op->isExpr())
+                {
+                    const BoolNot* notOp = dynamic_cast<const BoolNot*>(op.get());
+                    const BoolBit* bit = dynamic_cast<const BoolBit*>(notOp->begin()->get());
+                    buffer << "-" << bitId[bit] << " ";
 
-            }
-            else if(op->isVar())
-            {
-                const BoolBit* bit = static_cast<const BoolBit*>(op.get());
-                buffer << bitId[bit] << " ";
+                }
+                else if(op->isVar())
+                {
+                    const BoolBit* bit = static_cast<const BoolBit*>(op.get());
+                    buffer << bitId[bit] << " ";
+                }
             }
         }
+        else
+            throw std::runtime_error("BoolAlgorithms.isSat: invalid CNF");
         buffer << "0" << std::endl;
         ++nClauses;
     }
 
 
-    bool satResult = runLingelingSat("p cnf " + std::to_string(bitId.size()) + " " +
-                                     std::to_string(nClauses) + "\n" + buffer.str());
-
-    std::string dimacFile = "p cnf " + std::to_string(bitId.size()) + " " +
-                            std::to_string(nClauses) + "\n" + buffer.str();
-    std::cout << dimacFile << std::endl;
-
-    return satResult;
+    return move(runLingelingSat("p cnf " + std::to_string(bitId.size()) + " " +
+                            std::to_string(nClauses) + "\n" + buffer.str()));
 }
 
 
