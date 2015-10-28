@@ -40,7 +40,6 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
         const BoolExpr* expr = std::get<0>(parent);
         BoolFunc tempVar(std::get<1>(parent));
         assert(expr);
-        std::cout << "Processing Expression: " << expr->toString() << std::endl;
 
         vector<BoolFunc> operands;
         for(auto &op:*expr)
@@ -52,7 +51,6 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
                 BoolFunc bit = bMan.getBit(prefix, cnt++);
                 ptrs.push(std::make_tuple(opExpr, bit));
                 operands.push_back(bit);
-                std::cout << "Is expression: " << opExpr->toString() << std::endl;
             }
             else
                 operands.push_back(BoolFunc(op.get()));
@@ -81,11 +79,8 @@ BoolFunc generateCNF(const BoolFunc& func, string prefix, BoolManager& bMan) {
         }
         else if(expr->isNot())
         {
-            std::cout << "Is not expression" << std::endl;
-            assert(operands.size() == 1);
             CNF &= (!tempVar | !operands.front()) &
                    (tempVar | operands.front());
-            std::cout << "Not Expresion: " << ((!tempVar | !operands.front()) & (tempVar | operands.front())) << std::endl;
         }
         else
             throw std::runtime_error("Unknown expression type for CNF generation");
@@ -210,16 +205,21 @@ vector<int> runLingelingSat(std::string &&dimacsStr) {
 }
 
 
-vector<int> isSat(const BoolFunc& func) {
+vector<BoolFunc> isSat(const BoolFunc& func) {
     // Get Unique Ids for all bits
     unsigned int idCnt = 1;
     std::map<const BoolBit*, unsigned int, BoolBitCmp> bitId;
+    std::map<unsigned int, const BoolBit*> idLookup;
+
     auto addBits = [&](const BoolType *operand){
         if(operand->isVar())
         {
             auto rIter = bitId.find(static_cast<const BoolBit*>(operand));
             if(rIter == bitId.end())
-                bitId[static_cast<const BoolBit*>(operand)] = idCnt++;
+            {
+                bitId[static_cast<const BoolBit*>(operand)] = idCnt;
+                idLookup[idCnt++] = static_cast<const BoolBit*>(operand);
+            }
         }
         return true;
     };
@@ -262,8 +262,17 @@ vector<int> isSat(const BoolFunc& func) {
     }
 
 
-    return move(runLingelingSat("p cnf " + std::to_string(bitId.size()) + " " +
+    vector<int> idSolution = move(runLingelingSat("p cnf " + std::to_string(bitId.size()) + " " +
                             std::to_string(nClauses) + "\n" + buffer.str()));
+    vector<BoolFunc> solution;
+    for(auto id:idSolution)
+    {
+        if(id < 0)
+            solution.push_back(!BoolFunc(idLookup[abs(id)]));
+        else
+            solution.push_back(BoolFunc(idLookup[id]));
+    }
+    return move(solution);
 }
 
 
