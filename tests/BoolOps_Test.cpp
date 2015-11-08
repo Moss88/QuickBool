@@ -8,6 +8,7 @@
 #include<functional>
 
 using namespace std;
+using namespace QuickBool;
 
 unsigned int treeDepth(const BoolType* func, unsigned int cnt = 0) {
     if(func->isExpr())

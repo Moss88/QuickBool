@@ -1,6 +1,9 @@
 #ifndef BOOLNOT_H
 #define BOOLNOT_H
 #include "BoolExpr.h"
+
+namespace QuickBool {
+
 class BoolNot : public BoolExpr {
 public:
     BoolNot() = default;
@@ -13,5 +16,6 @@ public:
 
 };
 
+}
 #endif // BOOLNOT_H
 

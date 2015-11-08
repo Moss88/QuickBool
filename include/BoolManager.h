@@ -7,6 +7,7 @@
 #include "BitVector.h"
 #include "BoolBit.h"
 
+namespace QuickBool {
 
 class BoolManager {
     struct KeyPair {
@@ -29,6 +30,8 @@ public:
 private:
     std::map<KeyPair, std::shared_ptr<BoolBitShared>> vars;
 };
+
+}
 
 #endif // BOOLMANAGER_H
 

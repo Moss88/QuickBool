@@ -1,5 +1,5 @@
 #include "BoolBit.h"
-
+namespace QuickBool {
 BoolBit::BoolBit(std::shared_ptr<BoolBitShared> bb)
     : bb(bb) {}
 
@@ -67,4 +67,5 @@ void BoolBitShared::setVar(BoolValue val) {
 
 BoolType* BoolBitShared::clone() const {
     return new BoolBitShared(*this);
+}
 }

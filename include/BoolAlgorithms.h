@@ -3,6 +3,8 @@
 #include "BoolFunc.h"
 #include "BoolExpr.h"
 #include <functional>
+
+namespace QuickBool {
 class BoolManager;
 namespace BoolAlgo {
 
@@ -42,6 +44,6 @@ std::vector<BoolFunc> isSat(const BoolFunc& func);
 
 
 }
-
+}
 #endif // BOOLALGORITHMS_H
 

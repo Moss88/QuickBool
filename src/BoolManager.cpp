@@ -6,7 +6,7 @@
 using std::vector;
 using std::shared_ptr;
 using std::unique_ptr;
-
+namespace QuickBool {
 BoolFunc BoolManager::getBit(std::string name, int idx) {
     auto iter = vars.find(KeyPair(name, idx));
     if(iter == vars.end())
@@ -38,4 +38,4 @@ unsigned int BoolManager::numberVars() const {
 void BoolManager::setValue(BoolValue val, std::string name, int idx) {
     this->vars[BoolManager::KeyPair(name, idx)]->setVar(val);
 }
-
+}

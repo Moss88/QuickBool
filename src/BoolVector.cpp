@@ -5,7 +5,7 @@
 using std::cout;
 using std::endl;
 using std::move;
-
+namespace QuickBool {
 void sizeExcept(const BitVector& a, const BitVector& b){
     if(a.size() != b.size())
         throw std::runtime_error("BitVector: bitvectors do not match " +
@@ -98,4 +98,6 @@ std::vector<BoolFunc>::const_iterator BitVector::end() const {
 
 unsigned int BitVector::size() const {
     return bits.size();
+}
+
 }

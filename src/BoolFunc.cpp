@@ -8,6 +8,8 @@ using std::cout;
 using std::endl;
 
 using std::unique_ptr;
+
+namespace QuickBool {
 BoolFunc::BoolFunc(UBoolType val) : bValue(move(val)) {}
 
 BoolFunc::BoolFunc(bool val) {
@@ -158,4 +160,6 @@ bool BoolFunc::isVar() const {
 std::ostream& operator<<(std::ostream &stream, const BoolFunc& func) {
     stream << func.toString();
     return stream;
+}
+
 }

@@ -3,7 +3,7 @@
 #include <string>
 #include "BoolType.h"
 
-
+namespace QuickBool {
 class BoolBitShared : public BoolType {
 public:
     BoolBitShared(std::string name, unsigned int index = 0,
@@ -38,7 +38,7 @@ public:
 private:
     std::shared_ptr<BoolBitShared> bb;
 };
-
+}
 
 #endif // BOOLBIT_H
 

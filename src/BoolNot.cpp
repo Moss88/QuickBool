@@ -1,5 +1,6 @@
 #include "BoolNot.h"
 #include "iostream"
+namespace QuickBool {
 using namespace std;
 BoolNot::BoolNot(BoolType &a) {
     this->operands.push_back(std::unique_ptr<BoolType>(a.clone()));
@@ -30,4 +31,5 @@ bool BoolNot::isNot() const {
 
 BoolType* BoolNot::clone() const {
     return new BoolNot(*this);
+}
 }

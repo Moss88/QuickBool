@@ -19,7 +19,7 @@ using std::string;
 using std::stack;
 using std::tuple;
 using std::vector;
-
+namespace QuickBool {
 namespace BoolAlgo {
 
 
@@ -277,4 +277,4 @@ vector<BoolFunc> isSat(const BoolFunc& func) {
 
 
 }
-
+}

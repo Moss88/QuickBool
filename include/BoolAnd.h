@@ -1,6 +1,7 @@
 #ifndef BOOLAND_H
 #define BOOLAND_H
 #include "BoolNaryExpr.h"
+namespace QuickBool {
 class BoolFunc;
 class BoolAnd : public BoolNaryExpr {
 public:
@@ -14,6 +15,6 @@ public:
     BoolType* clone() const;
     bool isAnd() const;
 };
-
+}
 #endif // BOOLAND_H
 

@@ -3,6 +3,7 @@
 #include "BoolBit.h"
 #include<iostream>
 using namespace std;
+using namespace QuickBool;
 TEST(BoolManager, GetVar) {
     BoolManager bm;
     BoolFunc a = bm.getBit("a");

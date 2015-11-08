@@ -3,6 +3,7 @@
 #include <vector>
 #include "BoolFunc.h"
 
+namespace QuickBool {
 class BoolFunc;
 class BitVector {
 public:
@@ -27,6 +28,6 @@ public:
 private:
     std::vector<BoolFunc> bits;
 };
-
+}
 #endif // BOOLBITVECTOR_H
 

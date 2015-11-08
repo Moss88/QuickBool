@@ -4,6 +4,8 @@
 #include "BoolType.h"
 #include <iostream>
 
+namespace QuickBool {
+
 class BoolFunc {
 public:
     BoolFunc() = default;
@@ -44,5 +46,8 @@ BoolFunc operator!(const BoolBit& a);
 BoolFunc operator|(const BoolBit& a, const BoolBit& b);
 BoolFunc operator&(const BoolBit& a, const BoolBit& b);
 */
+
+}
+
 #endif // BOOLFUNC_H
 

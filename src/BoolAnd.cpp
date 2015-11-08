@@ -1,5 +1,5 @@
 #include "BoolAnd.h"
-
+namespace QuickBool {
 using std::unique_ptr;
 
 BoolAnd::BoolAnd(unique_ptr<BoolType> a, const BoolType &b) {       
@@ -80,4 +80,7 @@ bool BoolAnd::isAnd() const {
 
 BoolType* BoolAnd::clone() const {
     return new BoolAnd(*this);
+}
+
+
 }

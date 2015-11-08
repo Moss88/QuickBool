@@ -1,5 +1,5 @@
 #include "BoolBasicDefs.h"
-
+namespace QuickBool {
 std::string to_string(const BoolValue& value) {
     if(value == BoolValue::One)
         return "1";
@@ -7,4 +7,5 @@ std::string to_string(const BoolValue& value) {
         return "0";
     else
         return "???";
+}
 }

@@ -4,6 +4,7 @@
 #include "BoolAlgorithms.h"
 #include<iostream>
 using namespace std;
+using namespace QuickBool;
 TEST(BoolAlgo, isCNF) {
     BoolManager bm;
     BoolFunc a = bm.getBit("a");

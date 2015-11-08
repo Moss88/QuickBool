@@ -4,6 +4,9 @@
 #include <string>
 #include "BoolBasicDefs.h"
 #include "BoolType.h"
+
+namespace QuickBool {
+
 class BoolConstant : public BoolType {
 public:
     bool isVar() const;
@@ -41,5 +44,7 @@ public:
     BoolValue value() const;
     BoolType* clone() const;
 };
+
+}
 #endif // BOOLCONSTANTS_H
 

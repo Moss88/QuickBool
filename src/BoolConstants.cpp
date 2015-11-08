@@ -1,5 +1,7 @@
 #include "BoolConstants.h"
 #include "BoolBasicDefs.h"
+
+namespace QuickBool {
 bool BoolConstant::isVar() const {
     return false;
 }
@@ -44,4 +46,4 @@ BoolValue BoolDontCare::value() const {
 BoolType* BoolDontCare::clone() const {
     return new BoolDontCare();
 }
-
+}

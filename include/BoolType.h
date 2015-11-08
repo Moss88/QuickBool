@@ -2,6 +2,8 @@
 #define BOOLTYPE_H
 #include <string>
 #include "BoolBasicDefs.h"
+
+namespace QuickBool { 
 class BoolType {
 public:
     virtual BoolType* clone() const = 0;
@@ -39,7 +41,7 @@ protected:
 };
 
 
-
+}
 
 #endif // BOOLTYPE_H
 

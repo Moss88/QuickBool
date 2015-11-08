@@ -1,5 +1,5 @@
 #include "BoolOr.h"
-
+namespace QuickBool {
 using std::unique_ptr;
 BoolOr::BoolOr(unique_ptr<BoolType> a, const BoolType &b) {
     if(a.get()->isOr())
@@ -80,4 +80,5 @@ bool BoolOr::isOr() const {
 
 BoolType* BoolOr::clone() const {
     return new BoolOr(*this);
+}
 }

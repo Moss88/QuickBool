@@ -4,6 +4,8 @@
 #include "BoolBasicDefs.h"
 #include "BoolType.h"
 
+namespace QuickBool {
+
 class BoolExpr : public BoolType {
 public:
     virtual std::vector<UBoolType>::iterator begin() {
@@ -36,7 +38,7 @@ protected:
     std::vector<UBoolType> operands;
 };
 
-
+}
 
 #endif // BOOLEXPR_H
 

@@ -2,6 +2,8 @@
 #define BOOLNARYEXPR_H
 #include "BoolExpr.h"
 
+namespace QuickBool {
+
 class BoolFunc;
 class BoolNaryExpr : public BoolExpr {
 public:
@@ -10,11 +12,7 @@ public:
 
 };
 
-
-
-
-
-
+}
 
 #endif // BOOLNARYEXPR_H
 

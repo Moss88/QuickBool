@@ -6,7 +6,7 @@
 
 #include<iostream>
 using namespace std;
-
+using namespace QuickBool;
 TEST(BoolVector, lt) {
     BoolManager bm;
     BitVector vA = bm.getBitVector("a", 2);

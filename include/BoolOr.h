@@ -1,6 +1,9 @@
 #ifndef BOOLOR_H
 #define BOOLOR_H
 #include "BoolNaryExpr.h"
+
+namespace QuickBool {
+
 class BoolOr : public BoolNaryExpr {
 public:
     BoolOr() = default;
@@ -13,6 +16,6 @@ public:
     bool isOr() const;
 
 };
-
+}
 #endif // BOOLOR_H
 
