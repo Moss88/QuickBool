@@ -19,14 +19,18 @@ BoolFunc BoolManager::getBit(std::string name, int idx) {
 }
 
 BitVector BoolManager::getBitVector(std::string name, unsigned int size) {
-    if(vars.find(KeyPair(name, 0)) != vars.end())
-        throw std::runtime_error("BoolManager: Bit Vector Already Exists");
     vector<BoolFunc> bits;
     for(unsigned int i = 0; i < size; i++)
     {
-        shared_ptr<BoolBitShared> sbb = shared_ptr<BoolBitShared>(new BoolBitShared(name, i));
-        this->vars[BoolManager::KeyPair(name, i)] = sbb;
-        bits.push_back(BoolFunc(unique_ptr<BoolBit>(new BoolBit(sbb))));
+        auto key = vars.find(KeyPair(name, i));
+        if(key != vars.end())
+            bits.push_back(BoolFunc(unique_ptr<BoolBit>(new BoolBit(key->second))));
+        else
+        {
+            shared_ptr<BoolBitShared> sbb = std::make_shared<BoolBitShared>(BoolBitShared(name, i));
+            this->vars[BoolManager::KeyPair(name, i)] = sbb;
+            bits.push_back(BoolFunc(unique_ptr<BoolBit>(new BoolBit(sbb))));
+        }
     }
     return BitVector(move(bits));
 }
