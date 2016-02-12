@@ -1,13 +1,33 @@
 #include "BoolAnd.h"
+#include <iostream>
 namespace QuickBool {
 using std::unique_ptr;
+
+BoolAnd::BoolAnd(unique_ptr<BoolType> a, unique_ptr<BoolType> b) {       
+    if(a.get()->isAnd())
+    {
+        BoolAnd* andPtr = static_cast<BoolAnd*>(a.get());
+        this->operands = std::move(andPtr->operands);
+    }
+    else
+        this->operands.push_back(move(a));
+
+    if(b->isAnd())
+    {
+        BoolAnd* ptr = static_cast<BoolAnd*>(b.get());
+        std::move(ptr->operands.begin(), ptr->operands.end(), std::back_inserter(this->operands));
+    }
+    else
+        this->operands.emplace_back(move(b));
+}
+
+
 
 BoolAnd::BoolAnd(unique_ptr<BoolType> a, const BoolType &b) {       
     if(a.get()->isAnd())
     {
         BoolAnd* andPtr = static_cast<BoolAnd*>(a.get());
-        for(auto &op:*andPtr)
-            this->operands.push_back(move(op));
+        this->operands = std::move(andPtr->operands);
     }
     else
         this->operands.push_back(move(a));

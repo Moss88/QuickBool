@@ -8,6 +8,7 @@ public:
     BoolAnd() = default;
     BoolAnd(const BoolType& a, const BoolType& b);
     BoolAnd(std::unique_ptr<BoolType> a, const BoolType& b);
+    BoolAnd(std::unique_ptr<BoolType> a, std::unique_ptr<BoolType> b);
     BoolAnd(const BoolAnd& other);
 
     std::string toString() const;

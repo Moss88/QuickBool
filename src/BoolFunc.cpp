@@ -39,12 +39,12 @@ BoolFunc BoolFunc::operator=(const BoolFunc& func) {
     return *this;
 }
 
-BoolFunc BoolFunc::operator=(BoolFunc&& func) {
+BoolFunc& BoolFunc::operator=(BoolFunc&& func) {
     this->bValue = std::move(func.bValue);
     return *this;
 }
 
-BoolFunc BoolFunc::operator&=(const BoolFunc& func) {
+BoolFunc& BoolFunc::operator&=(const BoolFunc& func) {
     if(func.get()->isOne())
         return *this;
     else if(this->get()->isOne())
@@ -52,13 +52,35 @@ BoolFunc BoolFunc::operator&=(const BoolFunc& func) {
         *this = func;
         return *this;
     }
-    else if(func.get()->isZero() | this->get()->isZero())
-        return BoolFunc(false);
-
+    else if(func.get()->isZero() || this->get()->isZero())
+    {
+        *this = BoolFunc(false);
+        return *this;
+    }
     unique_ptr<BoolAnd> newFunc = unique_ptr<BoolAnd>(new BoolAnd(std::move(this->bValue), *func.bValue));
     this->bValue = move(newFunc);
     return *this;
 }
+
+BoolFunc& BoolFunc::operator&=(BoolFunc&& func) {
+    if(func.get()->isOne())
+        return *this;
+    else if(this->get()->isOne())
+    {
+        this->bValue = std::move(func.bValue);
+        return *this;
+    }
+    else if(func.get()->isZero() || this->get()->isZero())
+    {
+        *this = BoolFunc(false);
+        return *this;
+    }
+    
+    this->bValue = unique_ptr<BoolAnd>(new BoolAnd(std::move(this->bValue), std::move(func.bValue)));
+    return *this;
+}
+
+
 
 BoolFunc BoolFunc::operator&(const BoolFunc& other) const {
     if(other.get()->isOne())

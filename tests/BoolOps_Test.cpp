@@ -3,6 +3,7 @@
 #include "BitVector.h"
 #include "BoolExpr.h"
 #include "BoolAlgorithms.h"
+#include "BoolAnd.h"
 
 #include<iostream>
 #include<functional>
@@ -51,11 +52,26 @@ TEST(BoolOp, Not) {
     EXPECT_EQ(aNotNot.evaluate(), BoolValue::Zero);
 }
 
+TEST(BoolOp, AndNoValue) {
+    BoolManager bm;
+    BoolFunc a = bm.getBit("a");
+    BoolFunc b = bm.getBit("b");
+    BoolFunc c = bm.getBit("c");
+    BoolFunc d = bm.getBit("d");
+
+    BoolFunc func = a & b;
+    func &= c & d;
+    auto exprPtr = dynamic_cast<BoolAnd*>(func.get());
+    ASSERT_TRUE(exprPtr);
+    EXPECT_EQ(exprPtr->size(), 4);
+}
+
 TEST(BoolOp, And) {
     BoolManager bm;
     BoolFunc a = bm.getBit("a");
     BoolFunc b = bm.getBit("b");
     BoolFunc c = bm.getBit("c");
+    BoolFunc d = bm.getBit("d");
     bm.setValue(BoolValue::One, "a");
     bm.setValue(BoolValue::One, "b");
     bm.setValue(BoolValue::Zero, "c");

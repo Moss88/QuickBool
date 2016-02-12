@@ -18,9 +18,10 @@ public:
     // TODO implement move functionality to save performance
     // right now operations are very inefficent
     BoolFunc operator=(const BoolFunc& func);
-    BoolFunc operator=(BoolFunc&& func);
+    BoolFunc& operator=(BoolFunc&& func);
 
-    BoolFunc operator&=(const BoolFunc& func);
+    BoolFunc & operator&=(const BoolFunc& func);
+    BoolFunc & operator&=(BoolFunc&& func);
     BoolFunc operator&(const BoolFunc& func) const;
     BoolFunc operator&(const BoolType& func) const;
     BoolFunc operator|(const BoolFunc& func) const;
